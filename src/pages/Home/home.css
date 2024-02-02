@@ -1,0 +1,56 @@
+
+
+.heroCard{
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    width: 100%;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+.heroCard .heroTitle{
+    font-size: 16px;
+    font-weight: 600;
+    text-align: left;
+}
+.heroCard .heroDescription{
+    font-size: 12px;
+    font-weight: 300;
+    height: 70%;
+    overflow: hidden;
+    width: 90%;
+    text-align: left;
+}
+
+
+.heroImageBox{
+    overflow: hidden;
+    display: flex;
+    align-self: center;
+    height: 120px;
+    width: 83px;
+    margin-left: 10px;
+}
+.heroImage{
+    height: 100%;
+    width: 100%;
+    align-self: center;
+    object-position: center;
+    object-fit: cover;
+    border-radius: 10px;
+
+}
+
+.pagination{
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.searchBar{
+    border: none;
+    padding: 5px 5px;
+    margin-left: 10px;
+    font-weight: 500;
+    /* font-size: 14px; */
+}
