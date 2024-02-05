@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import ProfileTabs from "../../components/ProfileTabs"
 import LoadingBackdrop from '../../components/loadingBackdrop';
-import React  from 'react';
-
+import React from 'react';
+import { useTheme, useMediaQuery } from "@mui/material";
+import { Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import "./profile.css"
 import MarvelService from "../../services/MarvelService";
 
 function Profile(props) {
@@ -16,37 +16,18 @@ function Profile(props) {
     const { heroId } = location.state
     const [backdropOpen, setbackDropOpen] = useState(true)
     const [hero, setHero] = useState([])
-    const [heroComics, setHeroComics] = useState([])
-    const [heroEvents, setHeroEvents] = useState([])
-    const [heroSeries, setHeroSeries] = useState([])
-    const [heroStories, setHeroStories] = useState([])
-
+    const theme = useTheme()
+    const matchDownMd = useMediaQuery(theme.breakpoints.down('md'))
+    const drawerWidth = matchDownMd ? '0px' : '240px';
+      
 
     useEffect(() => {
         const searchHero = async () => {
 
             try {
                 const characters = await MarvelService.getSingleCharacter(heroId);
-                // const [character] = await Promise.all([
-                    // await MarvelService.getSingleCharacter(heroId),
-                    // await MarvelService.getCharacterComics(heroId),
-                    // await MarvelService.getCharacterEvents(heroId),
-                    // await MarvelService.getCharacterSeries(heroId),
-                    // await MarvelService.getCharacterStories(heroId)
-                // ]);
                 setHero(characters[0])
-                // setHeroComics(characterComics);
-                // setHeroEvents(characterEvents);
-                // setHeroSeries(characterSeries);
-                // setHeroStories(characterStories);
-                console.log(characters[0])
-                // console.log(characterComics)
-                // console.log(characterEvents)
-                // console.log(characterSeries)
-                // console.log(characterStories)
-            
                 setbackDropOpen(false);
-
             }
             catch (error) {
                 console.error("Não conseguiu buscar as informações", error)
@@ -56,23 +37,25 @@ function Profile(props) {
         } 
 
         searchHero()
-    }, [])
+    }, [heroId])
 
     
     return (
         <Box>
             <Menu />
             <LoadingBackdrop open={backdropOpen}/>
-            <Grid spacing={2} container component="main" sx={{ flexGrow: 1 }} className='mainContent'>
-                <Grid item>
+            <Grid spacing={2} container component="main" sx={{marginLeft: drawerWidth, width: `calc(100vw - ${drawerWidth})`, flexGrow: 1}} >
+                <Grid item lg={12} sx={{width: '100%'}}>
+                    <Grid sx={{marginTop: '10px', display: 'flex', placeContent: matchDownMd ? 'center' : 'left'}}>
 
-                <span className="profileHeader">
-                    <h2 className="profilePage">Perfil </h2>
-                    <h2 className="profileCut"> / </h2>
-                    <h2 className="profileName"> {hero.name}</h2>
-                    </span>
+                    <Typography variant={matchDownMd ? "p" : "h5" } sx={{color: '#081B4E', fontWeight: '700', display: 'flex', alignContent: 'center', marginTop:  matchDownMd ? '5px' : 0}}>
+                        Perfil
+                        <Typography variant={matchDownMd ? "p" : "h5" } sx={{color: '#F43724', paddingRight: '5px', paddingLeft: '5px'}}>/</Typography>
+                        <Typography variant={matchDownMd ? "p" : "h5" } sx={{color: '#777777', fontWeight: '300'}}>{hero.name}</Typography>
+                    </Typography>
+                    </Grid>
                     
-                <ProfileTabs hero={hero} heroComics={heroComics} heroEvents={heroEvents} heroSeries={heroSeries} heroStories={heroStories} />
+                <ProfileTabs hero={hero} />
                 </Grid>
             </Grid>
         </Box>

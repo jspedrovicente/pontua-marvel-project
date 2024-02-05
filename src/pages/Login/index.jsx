@@ -1,109 +1,125 @@
-import Button from '@mui/material/Button';
-import Menu from '../../components/Menu';
-import axios from 'axios'
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import SearchIcon from '@mui/icons-material/Search';
-import LoadingBackdrop from '../../components/loadingBackdrop';
-import { Container, SvgIcon  } from '@mui/material';
-import CssBaseline from '@mui/material/CssBaseline';
-import { styled } from '@mui/material/styles';
+import React from 'react';
+import 'react-toastify/dist/ReactToastify.css';
 import { useEffect, useState } from 'react';
-import MarvelService from '../../services/MarvelService';
-import Pagination from '@mui/material/Pagination';
-import Stack from '@mui/material/Stack';
+import { Link, useNavigate } from 'react-router-dom';
 import pontuaIconWhite from '../../assets/svgs/pontuaLogoWhite.svg'
 import pontuaBuilding from '../../assets/svgs/pontuaBuilding.svg'
-import loginIcon from '../../assets/svgs/loginIcon.svg'
 import passwordIcon from '../../assets/svgs/passwordIcon.svg'
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography'
-import { Link } from 'react-router-dom';
-import React  from 'react';
+import loginIcon from '../../assets/svgs/loginIcon.svg'
+import { InputAdornment, TextField, Typography, Grid, Box, AppBar } from '@mui/material';
+import MockDBService from '../../services/mockDBService';
+import { ToastContainer, toast } from "react-toastify";
+import Visibility from '@mui/icons-material/VisibilityOutlined';
+import VisibilityOff from '@mui/icons-material/VisibilityOffOutlined';
+import { IconButton } from '@mui/material';
+import { CustomInitialPageBox, CustomInitialPageButton, InitialPageGrid}  from '../../Styles/index.jsx'
+  
+const notifyError = (msg) => toast.error (msg);
+const notifySuccess = (msg) => toast.success (msg);
 
-function Login() {
-    const [backdropOpen, setbackDropOpen] = useState(false)
-    const [currentPageHeroes, setCurrentPageHeroes] = useState([])
+const Login = () => {
+
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        user: '',
+        email: '',
         password: ''
     })
-    const drawerWidth = 240;
-    const Item = styled(Paper)(({ theme }) => ({
-        padding: theme.spacing(1),
-        backgroundColor: '#EAECF0',
-        border: 'none',
-        boxShadow: 'none'
-      }));
-    
-    const CustomBox = styled(Container)(({ theme }) => ({
-        backgroundColor: '#00113D',
-        height: '100vh'
-    }))
-    const CustomLoginButton = styled(Button)(({ theme }) => ({
-        backgroundColor: '#00113D',
-        borderRadius: 10,
-        padding: '10px 0px 10px',
-        fontWeight: 700,
-        textTransform: 'none',
-        fontSize: 24,
-    }))
-    const LoginGrid = styled(Grid)(({ theme }) => ({
-        backgroundColor: '#fff',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '40px 30px 30px 30px',
-        borderRadius: 28,
-        maxWidth: '380px'
-    }))
+    const [showPassword, setShowPassword] = React.useState(false);
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
 
-    
+    const handleMouseDownPassword = (event) => {
+      event.preventDefault();
+    };
+    async function handleSubmit (e) {
+        e.preventDefault()
+        const log = await MockDBService.login(formData)
+        console.log(log)
+        if (log?.accessToken) {
+            window.localStorage.setItem('accessToken', log.accessToken)
+            notifySuccess(`Bem-vindo ${log?.user?.email}!`)
+            setTimeout(() => {
+
+                navigate('/selecionar-agente', { replace: true });
+            }, 1500)
+        } else {
+            notifyError('Algo deu errado, tente novamente')
+        }
+
+    }
+    function handleChange(e) {
+        setFormData({...formData, [e.target.name] : e.target.value})
+    }
+
     useEffect(() => {
     }, [])
 
     return (
-        <CustomBox maxWidth={false} maxheight='xl'>
+        <CustomInitialPageBox maxWidth={false} maxheight='xl'>
+            <ToastContainer />
         <AppBar
             position="static"
-            sx={{minHeight: '100px', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', backgroundColor: '#00113D'}}
-            >
-                <img src={pontuaIconWhite} alt="logomarca" style={{width: '150px', marginLeft: '6em'}}/>
+                sx={{ minHeight: '100px', display: 'flex', alignItems: {xs: 'center', sm: 'center', md: 'flex-start'}, justifyContent: 'center', backgroundColor: '#00113D'}}
+        >
+                <Box
+                    sx={{ width: '150px', marginLeft: {sm: '0', md: '6em'}}}
+                    component="img"
+                    alt="The house from the offer."
+                    src={pontuaIconWhite}
+                    />
         </AppBar>
             <Grid component='main' container sx={{alignItems: 'center', justifyContent: 'space-evenly'}}>
-                <Grid>
-                    <img src={pontuaBuilding} alt="" />
+                <Grid sx={{ display: { xs: 'none', sm: 'none', md: 'block', lg: 'block' } }}>
+                    <Box
+                    sx={{ width: {md: '450px', lg: '100%'}}}
+                    component="img"
+                    alt="The house from the offer."
+                    src={pontuaBuilding}
+                    />
                 </Grid>
                 <Grid>
-                    <LoginGrid container>
+                <form onSubmit={e => handleSubmit(e)}>
+                    <InitialPageGrid container>
                         <Grid item sx={{flexDirection: 'row', display: 'flex', marginBottom: 2}} >
                         <Typography variant='h4' sx={{fontWeight: 700, color: '#081B4E'}}>
                             Bem-Vindo
-                        </Typography>
-                        <Typography variant='h4' sx={{fontWeight: 700, color: '#F43724'}}>
+                        <Typography variant='p' sx={{fontWeight: 700, color: '#F43724'}}>
                             .
+                        </Typography>
                         </Typography>
                         </Grid>
                         <Typography sx={{textAlign: 'left', marginBottom: 1}} >
                         informe as suas credenciais de acesso ao portal
                         </Typography>
-                        <TextField id="outlined-basic" label="Outlined" variant="outlined" InputProps={{ sx: { borderRadius: 3 } }} sx={{marginBottom: 3}} />
-                        <TextField id="outlined-basic" label="Outlined" variant="outlined" InputProps={{ sx: { borderRadius: 3 } }} sx={{marginBottom: 2}}  />
-                        <CustomLoginButton variant="contained">entrar <img style={{ marginLeft: '10px' }} src={loginIcon} alt="" /></CustomLoginButton>
+                        <TextField id="outlined-basic" label="Email" variant="outlined" name='email'
+                        InputProps={{ sx: { borderRadius: 3 }, endAdornment: <InputAdornment position="end">@</InputAdornment> }} sx={{ marginBottom: 3 }} value={formData.email} onChange={e => handleChange(e)} />
+                        
+                        <TextField id="outlined-basic" type={showPassword ? 'text' : 'password'} value={formData.password} label="Senha" name='password' variant="outlined" onChange={e => handleChange(e)} InputProps={{ sx: { borderRadius: 3 }, endAdornment:  <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={handleClickShowPassword}
+                  onMouseDown={handleMouseDownPassword}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff fontSize='small' /> : <Visibility fontSize='small'/>}
+                </IconButton>
+              </InputAdornment>
+            }} sx={{ marginBottom: 2 }} />
+
+                        <CustomInitialPageButton type='submit' variant="contained">entrar <img style={{ marginLeft: '10px' }} src={loginIcon} alt="" /></CustomInitialPageButton>
+                            
                         <Grid item sx={{ flexDirection: 'row', display: 'flex', marginBottom: 2, justifyContent: 'end' }} >
                         <img src={passwordIcon} alt="" style={{paddingTop: '5px', paddingRight: '5px'}} />
-                        <Typography component={Link} to='/esqueceu-senha' sx={{ fontSize: '11px', color: '#F21A05', marginTop: 1, fontWeight: 400 }}>
+                        <Typography component={Link} underline="none" to='/esqueceu-senha' sx={{textDecoration: 'none', fontSize: '11px', color: '#F21A05', marginTop: 1, fontWeight: 400 }}>
                         Esqueceu a senha?
                         </Typography>
                         </Grid>
 
-                    </LoginGrid>
+                    </InitialPageGrid>
+                </form>
                 </Grid>
                 
                 </Grid>
-        </CustomBox>
+        </CustomInitialPageBox>
     )
 }
 

@@ -1,47 +1,42 @@
-import * as React from 'react';
-import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
-import CssBaseline from '@mui/material/CssBaseline';
-import { Grid } from '@mui/material';
-import List from '@mui/material/List';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
-import MailIcon from '@mui/icons-material/Mail';
+import React from 'react';
+import { Button, Drawer, Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, useMediaQuery, useTheme } from '@mui/material';
 import DashboardIcon from '../../assets/svgs/dashboard.svg'
 import PerfilIcon from '../../assets/svgs/perfil.svg'
 import exitIcon from '../../assets/svgs/exit.svg'
 import pontuaIcon from '../../assets/svgs/pontua.svg'
 import { Link } from 'react-router-dom';
-
-import "./menu.css"
-
+import { useState } from 'react';
+import MenuIcon from '@mui/icons-material/Menu';
+import { Navigate } from 'react-router-dom';
 function Menu() {
-    const drawerWidth = 240;
-    
-    return (
-                
-      <Drawer
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-          },
-        }}
-        variant="permanent"
-        anchor="left"
-                >
-                    <List>
-                    <ListItem >
-                            <ListItemButton className='logoButton'>
-                                <ListItemIcon>
+  const theme = useTheme()
+  const matchDownMd = useMediaQuery(theme.breakpoints.down('md'))
+  const drawerWidth = matchDownMd ? '0px' : '240px';
+  const [mobileDrawer, setmobileDrawer] = useState(false)
+
+  const toggleDrawer = (open) => (event) => {
+    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+      return;
+    }
+    setmobileDrawer(open)
+  };
+
+
+  const logOut = () => {
+    localStorage.removeItem('accessToken')
+    return <Navigate to="/login" replace />
+  }
+  const list = () => (
+    <Box
+      sx={{ width: 240 }}
+      role="presentation"
+      onClick={toggleDrawer(false)}
+      onKeyDown={toggleDrawer(false)}
+    >
+      <List>
+        <ListItem >
+        <ListItemButton className='logoButton'>
+        <ListItemIcon>
             <img className='homeLogoCss' src={pontuaIcon} alt="" />
                                 </ListItemIcon>
                     </ListItemButton>
@@ -58,7 +53,7 @@ function Menu() {
             </ListItem>
                         
             <ListItem key={'Perfil'} disablePadding>
-              <ListItemButton component={Link} to="/profile">
+              <ListItemButton component={Link} to="/selecionar-agente">
                 <ListItemIcon>
                     <img src={PerfilIcon} alt="Perfil" />
                 </ListItemIcon>
@@ -70,7 +65,7 @@ function Menu() {
                     
         <List>
             <ListItem key={'Sair'} disablePadding>
-                  <ListItemButton component={Link} to="/login">
+                  <ListItemButton component={Link} to="/login" onClick={() => logOut()}>
                 <ListItemIcon>
                   <img src={exitIcon} alt="Sair" />
                 </ListItemIcon>
@@ -78,8 +73,38 @@ function Menu() {
               </ListItemButton>
             </ListItem>
         </List>
+    </Box>
+  );
+  return (
+    matchDownMd ? ( 
+      <div>
+        <React.Fragment>
+          <Button sx={{position: 'absolute', top: 0, left: 0, marginTop: '5px'}} onClick={toggleDrawer(true)}><MenuIcon /></Button>
+          <Drawer
+            anchor='left'
+            open={mobileDrawer}
+            onClose={toggleDrawer(false)}
+          >
+            {list()}
+          </Drawer>
+        </React.Fragment>
+    </div>
+    ): (
+      <Drawer
+      sx={{
+        width: drawerWidth,
+        flexShrink: 0,
+        '& .MuiDrawer-paper': {
+          width: drawerWidth,
+          boxSizing: 'border-box',
+        },
+      }}
+      variant={'permanent'}
+          anchor="left">
+          {list()}
       </Drawer>
-        
+      
+    )
     )
 
 }

@@ -22,3 +22,22 @@ code {
 .MuiButton-root{
   font-family: 'Epilogue' !important;
 }
+
+.MuiInputAdornment-root
+{
+  font-weight: 500 !important;
+}
+
+.logoButton{
+  padding-left: 0 !important;
+}
+
+.MuiAppBar-root{
+  box-shadow: none !important;
+}
+
+.MuiToolbar-root{
+  background-color: #fff;
+
+
+}

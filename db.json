@@ -9,6 +9,11 @@
       "email": "tes232te@gmail.com",
       "password": "$2a$10$logL4PUOcH0n34pnzCeLPe5dsexfrs8OzyqtSOS5tsI41.n6bMAh6",
       "id": 2
+    },
+    {
+      "email": "jose@gmail.com",
+      "password": "$2a$10$0YcNhyqAMW1XEwLg1IYjGehHWjtYkxyKnYx0id9u3KqV94DmZE4fu",
+      "id": 3
     }
   ]
 }

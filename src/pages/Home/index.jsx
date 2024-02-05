@@ -1,35 +1,36 @@
 import Button from '@mui/material/Button';
 import Menu from '../../components/Menu';
-import axios from 'axios'
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import SearchIcon from '@mui/icons-material/Search';
 import LoadingBackdrop from '../../components/loadingBackdrop';
 import React  from 'react';
-import { Container } from '@mui/material';
-import CssBaseline from '@mui/material/CssBaseline';
-import { styled } from '@mui/material/styles';
-import './home.css'
 import { useEffect, useState } from 'react';
 import MarvelService from '../../services/MarvelService';
 import Pagination from '@mui/material/Pagination';
-import Stack from '@mui/material/Stack';
 import { Link } from 'react-router-dom';
-
+import { useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material';
+import pontuaIcon from '../../assets/svgs/pontua.svg'
+import { CustomHomeItem, StyledInputBase, CustomHeroPaper, CustomHeroGrid, CustomHeroInnerGrid }  from '../../Styles/index.jsx'
+import { Drawer } from '@mui/material';
 
 function Home() {
     const [page, setPage] = useState(1);
     const [maxPageCounter, setMaxPageCounter] = useState(10);
     const [backdropOpen, setbackDropOpen] = useState(true)
-    const [marvelHeroes, setMarvelHeroes] = useState([]);
+    const [searchText, setSearchText] = useState('');
     const [currentPageHeroes, setCurrentPageHeroes] = useState([])
-    const drawerWidth = 240;
+    const theme = useTheme()
+    const matchDownMd = useMediaQuery(theme.breakpoints.down('md'))
+    const drawerWidth = matchDownMd ? '0px' : '240px';
+    const [mobileSearchDrawer, setMobileSearchDrawer] = useState(false) 
+
     const puxarHerois = async () => {
         setbackDropOpen(true)
-        const characters = await MarvelService.getAllCharacters();
+        const characters = await MarvelService.getAllCharacters(10);
 
         characters.results.forEach(async (character) => {
             const img = new Image();
@@ -37,7 +38,6 @@ function Home() {
             await img.decode();
         })
         setMaxPageCounter(Math.ceil(characters.total / 10))
-        setMarvelHeroes(characters.results)
         setCurrentPageHeroes(characters.results.slice(0, 10));
         setbackDropOpen(false)
 
@@ -46,8 +46,11 @@ function Home() {
     const handlePageChange = async (event, value) => {
         setbackDropOpen(true)
         setPage(value);
-        const characters = await MarvelService.getCharacters((value - 1) * 10);
-
+        if (searchText === '') {
+            var characters = await MarvelService.getCharacters((value - 1) * 10);
+        } else {
+            var characters = await MarvelService.getCharactersWithOffset(searchText, ((value - 1) * 10))
+        }
         characters.forEach(async (character) => {
             const img = new Image();
             img.src = character.thumbnail.path + "." + character.thumbnail.extension;
@@ -57,73 +60,101 @@ function Home() {
         setbackDropOpen(false)
 
     }
-
-    const handleSearch = async (event, value) => {
-        setbackDropOpen(true);
-        const characters = await MarvelService.searchCharacterByName('spider');
-
+    const reset = () => {
+        setSearchText('')
+        puxarHerois()
     }
-    const Item = styled(Paper)(({ theme }) => ({
-        padding: theme.spacing(1),
-        backgroundColor: '#EAECF0',
-        border: 'none',
-        boxShadow: 'none'
-      }));
-    
-    
+    const handleSearch = async (event, value) => {
+        event.preventDefault();
+        setbackDropOpen(true);
+        setPage(1)
+        if (searchText === '') {
+            puxarHerois()
+        } else {
+            const characters = await MarvelService.searchCharacterByName(searchText);
+            characters.results.forEach(async (character) => {
+                const img = new Image();
+                img.src = character.thumbnail.path + "." + character.thumbnail.extension;
+                await img.decode()
+            })
+            setMaxPageCounter(Math.ceil(characters.total / 10))
+            setCurrentPageHeroes(characters.results);
+        }
+        
+        setbackDropOpen(false)
+        setMobileSearchDrawer(false)
+    }
+
     useEffect(() => {
         puxarHerois()
     }, [])
 
     return (
-        <Box>
-        <AppBar
-        position="static"
-        sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px` }}
-      >
-                <Toolbar>
-                    <SearchIcon sx={{color: '#747D94' }}></SearchIcon>
-                    <input type="text" />
+    <Box>
+        <AppBar position="static" sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}` }}>
+        <Toolbar sx={{placeContent: matchDownMd ? 'center' : 'left'}}>
+    {matchDownMd ? (
+                    <>
+                    <Box
+                        component="img"
+                        alt=""
+                        src={pontuaIcon}
+                        onClick={() => reset()}/>
+                    <SearchIcon sx={{color: '#747D94', position: 'absolute', right: '0', marginRight: '10px', marginBottom: '8px' }} onClick={() => setMobileSearchDrawer(true)} />
+                    </>
+    ):
+    (   <form onSubmit = { handleSearch }>
+            <Button type='submit'>
+            <SearchIcon ></SearchIcon>
+            </Button>
+            <StyledInputBase
+                placeholder="Busque um agente"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                inputProps={{ 'aria-label': 'search' }}
+            />
+        </form>
+    )}
+                    
         </Toolbar>
         </AppBar>
+        <Drawer anchor='top' open={mobileSearchDrawer} onClose={() => setMobileSearchDrawer(false)}>
+        <form onSubmit = { handleSearch }>
+        <Button type='submit'>
+            <SearchIcon />  
+        </Button>
+        <StyledInputBase
+        placeholder="Busque um agente"
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        inputProps={{ 'aria-label': 'search' }}
+        />
+        </form>
+        </Drawer>
             <LoadingBackdrop open={backdropOpen} />
             <Menu />
-            <Grid container spacing={2} component="main" sx={{ flexGrow: 1 }} className='mainContent'>
-                {currentPageHeroes.map((hero, index, array) => (
-
-                    <Grid key={index} item component={Link} to="/profile" state={{heroId: hero.id}}  sm={12} lg={index === array.length - 1 || index === array.length - 2 ? 6 : 3} md={6} spacing={2}
-                        sx={{
-                            height: 150,
-                            marginBottom: 2
-                    }}>
-                        <Paper
-                        sx = {{
-                            height: 150,
-                            // width: index === array.length - 1 || index === array.length - 2 ? 530 : 258,
-                            borderRadius: 3,
-                            backgroundColor: '#EAECF0',
-                            display: 'flex',
-                            flexDirection: 'row'
-                            }}
-                        >
-                        <Grid className='heroImageBox'>
-                        <img className='heroImage' src={hero.thumbnail.path + "." + hero.thumbnail.extension} alt="" />
+            <Grid container sx={{marginLeft: drawerWidth, maxWidth: `calc(100vw - ${drawerWidth})`, flexGrow: 1}} spacing={2} component="main">
+                {currentPageHeroes?.map((hero, index, array) => (
+                <CustomHeroGrid key={index} item component={Link} to="/profile" state={{heroId: hero.id}}  sm={12} lg={index === array.length - 1 || index === array.length - 2 ? 6 : 3} md={6} spacing={2}>
+                    <CustomHeroPaper>
+                            <Grid sx={{ overflow: 'hidden', display: 'flex', alignSelf: 'center', height: '120px', width: '83px', marginLeft: '10px' }}>
+                    <Box  sx={{ height: '100%', width: '100%',alignSelf: 'center', objectPosition: 'center', objectFit: 'cover', borderRadius: '10px'}}
+                    component="img"
+                    alt=""
+                    src={hero?.thumbnail.path + "." + hero?.thumbnail.extension}
+                        />
                         </Grid>
-                            <Grid className='heroCard'
-                                sx={{
-                                    maxHeight: 150,
-                                    flexDirection: 'column',
-                            }}>
-                                <Item className='heroTitle'>{hero.name}</Item>
-                                <Item className='heroDescription'>{hero.description}</Item>
-                            </Grid>
+                            <CustomHeroInnerGrid>
+                        <CustomHomeItem sx={{fontSize: '16px', fontWeight: '600', textAlign: 'left'}}>{hero?.name}</ CustomHomeItem>
+                        <CustomHomeItem sx={{fontSize: '12px', fontWeight: '300', height: '70%', overflow: 'hidden', width: '90%', textAlign: 'left'}}>{hero?.description}</ CustomHomeItem>
+                            </CustomHeroInnerGrid>
 
-                            </Paper>
-                    </Grid>
+                            </CustomHeroPaper>
+                </CustomHeroGrid>
                 ))}
             </Grid >
 
-            <Pagination className='pagination' count={maxPageCounter} page={page} onChange={handlePageChange} variant="outlined" shape="rounded" />
+            <Pagination sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px'}} count={maxPageCounter} page={page} onChange={handlePageChange} variant="outlined" shape="rounded" />
         </Box>
         
         

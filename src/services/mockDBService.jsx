@@ -1,21 +1,20 @@
-import axios from "axios";
 
 class MockService {
 
-    static async login(data) {
+    static async login(formData) {
         try {
-            const response = axios.post('http://localhost:8000/login', {
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-                .then(response => response.json())
-                .then(data => console.log(data.user))
+        const response = await fetch('http://localhost:8000/login', {
+            method: 'POST',
+            headers: {'Content-Type' : 'application/json'},
+            body: JSON.stringify(formData)
+        })
+            const data = await response.json()
+                
+            return data
         }
         catch {
             console.log('deu ruim')
-        }
-
-        
+        }      
 
     }
 
