@@ -44,7 +44,7 @@ function Menu() {
                     </List>
         <List>
             <ListItem key={'Home'} disablePadding>
-              <ListItemButton component={Link} to="/">
+              <ListItemButton component={Link} to="/home">
                 <ListItemIcon>
                     <img src={DashboardIcon} alt="Home" />
                 </ListItemIcon>

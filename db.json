@@ -14,6 +14,16 @@
       "email": "jose@gmail.com",
       "password": "$2a$10$0YcNhyqAMW1XEwLg1IYjGehHWjtYkxyKnYx0id9u3KqV94DmZE4fu",
       "id": 3
+    },
+    {
+      "email": "tecnologia@pontua.com.br",
+      "password": "$2a$10$2qHgRxQUNemHMBtTdVJcb.cXVeFFTMyk7LBpssPv8FG1V/zV/FDUq",
+      "id": 4
+    },
+    {
+      "email": "gente@pontua.com.br",
+      "password": "$2a$10$TeSgdgkXTrBYPDBe77fPHuW.OTmhwnrWQbeIKF/ZtYMhjWGM8Y98.",
+      "id": 5
     }
   ]
 }
